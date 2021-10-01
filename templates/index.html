@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token }}">
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <title>Document</title>
+</head>
+<body>
+    <div class="container my-4">
+        <div class="card shadow">
+            <div class="card-header">
+                <h3 class="text-center">E-KTP Watermarking</h3>
+            </div>
+            <div class="card-body">
+                <ul class="nav nav-tabs" id="myTab" role="tablist">
+                    <li class="nav-item" role="presentation">
+                      <button class="nav-link active" id="watermark-tab" data-bs-toggle="tab" data-bs-target="#watermark" type="button" role="tab" aria-controls="watermark" aria-selected="true">Watermark</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                      <button class="nav-link" id="profile-tab" data-bs-toggle="tab" data-bs-target="#profile" type="button" role="tab" aria-controls="profile" aria-selected="false">Read Watermark</button>
+                    </li>
+                  </ul>
+                  <div class="tab-content" id="myTabContent">
+                    <div class="tab-pane fade show active" id="watermark" role="tabpanel" aria-labelledby="watermark-tab">
+                        <form action="" id="form-upload" method="POST" enctype="multipart/form-data">
+                            {% csrf_token %}
+                            <div class="my-3">
+                                <label for="formFile" class="form-label">File KTP</label>
+                                <input class="form-control" type="file" id="formFile" name="file">
+                            </div>
+                            <div class="my-3">
+                                <label for="name" class="form-label">Teks Watermark</label>
+                                <textarea class="form-control" id="name" name="name"></textarea>
+                            </div>
+                            <div class="form-check my-3">
+                                <input class="form-check-input" type="checkbox" value="" id="flexCheckDefault">
+                                <label class="form-check-label" for="flexCheckDefault">
+                                  Visible Watermark
+                                </label>
+                              </div>
+                            <div class="d-grid">
+                                <button class="btn btn-primary mt-3" type="submit">Save</button>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="tab-pane fade" id="profile" role="tabpanel" aria-labelledby="profile-tab">
+                        <form action="" id="form-read" method="POST" enctype="multipart/form-data">
+                            {% csrf_token %}
+                            <div class="my-3">
+                                <label for="formFile" class="form-label">File KTP Watermark</label>
+                                <input class="form-control" type="file" id="formFile" name="file">
+                            </div>
+                            <div class="d-grid">
+                                <button class="btn btn-primary mt-3" type="submit">Save</button>
+                            </div>
+                        </form>
+                    </div>
+                  </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal fade" id="imageModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Watermark</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <a href="" id="linkDonwload" download>
+                        <button type="button" class="btn btn-primary">Download</button>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script>
+
+        $(document).ready(function(){
+            $.ajaxSetup({
+                headers: {
+                    "X-CSRFToken": $('meta[name="csrf-token"]').attr("content"),
+                },
+            });
+        })
+
+        $("#form-upload").submit(function(e){
+            e.preventDefault()
+            $.ajax({
+                url: $(this).attr('action'),
+                method: $(this).attr('method'),
+                data: new FormData(this), 
+                processData: false,
+                contentType: false,
+                success: function(res){
+                    $(".modal-body").html('')
+                    let img = document.createElement('img');
+                    img.src = res.data
+                    img.classList.add("img-thumbnail")
+                    $("#linkDonwload").attr("href", res.data)
+                    $(".modal-body").append(img)
+                    $("#imageModal").modal('show')
+                }
+            })
+        })
+        $("#form-read").submit(function(e){
+            e.preventDefault()
+            let tekss = `<h2 class="text-center">Digunakan untuk registrasi di A</h2>`
+            $(".modal-body").append(tekss)
+            $("#imageModal").modal('show')
+        })
+    </script>
+</body>
+</html>
