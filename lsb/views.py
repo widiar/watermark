@@ -38,7 +38,7 @@ class HalamanDepanView(View):
             img = np.array(Image.open(file.file.path))
             gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
             th, threshed = cv2.threshold(gray, 127, 255, cv2.THRESH_TRUNC)
-            pytesseract.pytesseract.tesseract_cmd = './.apt/usr/bin/tesseract'
+            # pytesseract.pytesseract.tesseract_cmd = './.apt/usr/bin/tesseract'
             result = pytesseract.image_to_string((threshed), lang="ind")
             if "NIK" in result and "Nama" in result and "Tempat/Tgi Lahir" in result:
                 print("Valid")
