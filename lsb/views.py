@@ -11,6 +11,7 @@ from io import BytesIO
 import requests
 import cv2
 import numpy as np
+import pytesseract
 
 def isValid(s):
     return len(s) == len(s.encode())
@@ -32,6 +33,21 @@ class HalamanDepanView(View):
             media_dir = settings.MEDIA_ROOT
             namefile = "dummy" + str(time()) + ".png"
             file_path = os.path.join(media_dir, namefile)
+
+            #cek valid ktp
+            img = np.array(Image.open(file.file.path))
+            gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+            th, threshed = cv2.threshold(gray, 127, 255, cv2.THRESH_TRUNC)
+            pytesseract.pytesseract.tesseract_cmd = 'C:\Program Files\Tesseract-OCR\\tesseract.exe'
+            result = pytesseract.image_to_string((threshed), lang="ind")
+            if "NIK" in result and "Nama" in result and "Tempat/Tgi Lahir" in result:
+                print("Valid")
+            else:
+                os.remove(file.file.path)
+                ImageDummy.objects.get(id=file.id).delete()
+                return JsonResponse({
+                    "status": 401
+                })
 
             if visible == 1:
                 #convert teks ke image
