@@ -32,6 +32,7 @@
                             <div class="my-3">
                                 <label for="formFile" class="form-label">File KTP</label>
                                 <input required class="form-control" type="file" id="formFile" name="file">
+                                <small class="text-muted"><i>*Pastikan file KTP tidak buram</i></small>
                             </div>
                             <div class="my-3">
                                 <label for="name" class="form-label">Teks Watermark</label>
@@ -173,7 +174,9 @@
                     }else if(res.status == 401){
                         toastr.error("KTP tidak valid")
                     }else{
-                        console.log(res.data)
+                        console.log(res.data.name)
+                        if(res.data.file[0]) toastr.error(res.data.file[0], "File KTP")
+                        if(res.data.name) toastr.error(res.data.name, "Teks Watermark")
                     }
                 }
             })
@@ -206,11 +209,15 @@
                     Swal.close()
                 },
                 success: function(res){
-                    $(".modal-body").html('')
-                    let tekss = `<h2 class="text-center">${res.data}</h2>`
-                    $(".modal-body").append(tekss)
-                    $('#linkDonwload').hide()
-                    $("#imageModal").modal('show')
+                    if (res.status == 200){
+                        $(".modal-body").html('')
+                        let tekss = `<h2 class="text-center">${res.data}</h2>`
+                        $(".modal-body").append(tekss)
+                        $('#linkDonwload').hide()
+                        $("#imageModal").modal('show')
+                    }else{
+                        if(res.data.file[0]) toastr.error(res.data.file[0], "File KTP")
+                    }
                 }
             })
         })
