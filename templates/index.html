@@ -179,6 +179,22 @@
                 data: data, 
                 processData: false,
                 contentType: false,
+                beforeSend: () =>{
+                    Swal.fire({
+                        title: 'Read Watermark',
+                        text: 'Sedang di proses',
+                        timer: 10000,
+                        allowOutsideClick: false,
+                        allowEscapeKey: false,
+                        didOpen: () =>{
+                            Swal.showLoading()
+                        }
+                    })
+                },
+                complete: () =>{
+                    Swal.stopTimer()
+                    Swal.close()
+                },
                 success: function(res){
                     $(".modal-body").html('')
                     let tekss = `<h2 class="text-center">${res.data}</h2>`
