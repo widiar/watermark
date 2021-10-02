@@ -172,7 +172,7 @@
                         $(".modal-body").append(img)
                         $("#imageModal").modal('show')
                     }else if(res.status == 401){
-                        toastr.error("KTP tidak valid")
+                        toastr.error("File KTP tidak valid")
                     }else{
                         console.log(res.data.name)
                         if(res.data.file[0]) toastr.error(res.data.file[0], "File KTP")
@@ -215,6 +215,8 @@
                         $(".modal-body").append(tekss)
                         $('#linkDonwload').hide()
                         $("#imageModal").modal('show')
+                    }else if(res.status == 401){
+                        toastr.error("File KTP tidak valid")
                     }else{
                         if(res.data.file[0]) toastr.error(res.data.file[0], "File KTP")
                     }

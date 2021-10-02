@@ -31,7 +31,7 @@ class HalamanDepanView(View):
             visible = form.cleaned_data['visible']
             file = form.save()
             media_dir = settings.MEDIA_ROOT
-            namefile = "dummy" + str(time()) + ".png"
+            namefile = "ktp" + str(time()) + ".png"
             file_path = os.path.join(media_dir, namefile)
 
             #cek valid ktp
@@ -138,6 +138,21 @@ class ReadKTPView(View):
         form = self.form_class(request.POST, request.FILES)
         if form.is_valid():
             file = form.save()
+
+             #cek valid ktp
+            img = np.array(Image.open(file.file.path))
+            gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+            th, threshed = cv2.threshold(gray, 127, 255, cv2.THRESH_TRUNC)
+            # pytesseract.pytesseract.tesseract_cmd = 'C:\Program Files\Tesseract-OCR\\tesseract.exe'
+            result = pytesseract.image_to_string((threshed), lang="ind")
+            if "NIK" in result and "Nama" in result:
+                print("Valid")
+            else:
+                os.remove(file.file.path)
+                ImageDummy.objects.get(id=file.id).delete()
+                return JsonResponse({
+                    "status": 401
+                })
 
             ktpImage = Image.open(file.file.path)
             ktpImageData = list(ktpImage.getdata())
