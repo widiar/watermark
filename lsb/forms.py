@@ -5,3 +5,5 @@ class ImageForm(forms.ModelForm):
     class Meta:
         model = ImageDummy
         fields = '__all__'
+    
+    visible = forms.IntegerField()

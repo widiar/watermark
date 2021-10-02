@@ -30,14 +30,14 @@
                             {% csrf_token %}
                             <div class="my-3">
                                 <label for="formFile" class="form-label">File KTP</label>
-                                <input class="form-control" type="file" id="formFile" name="file">
+                                <input required class="form-control" type="file" id="formFile" name="file">
                             </div>
                             <div class="my-3">
                                 <label for="name" class="form-label">Teks Watermark</label>
-                                <textarea class="form-control" id="name" name="name"></textarea>
+                                <textarea required class="form-control" id="name" name="name"></textarea>
                             </div>
                             <div class="form-check my-3">
-                                <input class="form-check-input" type="checkbox" value="" id="flexCheckDefault">
+                                <input class="form-check-input" name="visible" type="checkbox" id="flexCheckDefault">
                                 <label class="form-check-label" for="flexCheckDefault">
                                   Visible Watermark
                                 </label>
@@ -48,7 +48,7 @@
                         </form>
                     </div>
                     <div class="tab-pane fade" id="profile" role="tabpanel" aria-labelledby="profile-tab">
-                        <form action="" id="form-read" method="POST" enctype="multipart/form-data">
+                        <form action="/read" id="form-read" method="POST" enctype="multipart/form-data">
                             {% csrf_token %}
                             <div class="my-3">
                                 <label for="formFile" class="form-label">File KTP Watermark</label>
@@ -65,7 +65,7 @@
     </div>
 
     <!-- Modal -->
-    <div class="modal fade" id="imageModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal fade" id="imageModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
@@ -76,7 +76,7 @@
                     
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-secondary closeModal" data-bs-dismiss="modal">Close</button>
                     <a href="" id="linkDonwload" download>
                         <button type="button" class="btn btn-primary">Download</button>
                     </a>
@@ -87,6 +87,7 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
 
         $(document).ready(function(){
@@ -97,31 +98,98 @@
             });
         })
 
+        const deleteKTP = () => {
+            let url = $("#linkDonwload").attr("href")
+            if (url != '') {
+                let img = url.replace('/media/', '')
+                $.ajax({
+                    url: '/delete',
+                    method: 'POST',
+                    data:{
+                        filename: img
+                    },
+                    success: () => {
+                        $("#linkDonwload").attr("href", '')
+                        console.log("Sukses")
+                    }
+                })
+            }
+        }
+
+        let myModal = $('#imageModal')
+        myModal.on('hidden.bs.modal', deleteKTP)
+
+        $("#linkDonwload").click(() => {
+            $('#imageModal').modal('toggle')
+        })
+
         $("#form-upload").submit(function(e){
             e.preventDefault()
+            let visible = $('input[name="visible"]').prop('checked');
+            if (visible === true) visible = 1
+            else visible = 0
+            data = new FormData(this)
+            data.append("visible", visible)
             $.ajax({
                 url: $(this).attr('action'),
                 method: $(this).attr('method'),
-                data: new FormData(this), 
+                data: data, 
                 processData: false,
                 contentType: false,
+                beforeSend: () =>{
+                    Swal.fire({
+                        title: 'Watermarking',
+                        text: 'Sedang di proses',
+                        timer: 2000,
+                        allowOutsideClick: false,
+                        allowEscapeKey: false,
+                        didOpen: () =>{
+                            Swal.showLoading()
+                        }
+                    })
+                },
+                complete: () =>{
+                    Swal.stopTimer()
+                    Swal.close()
+                },
                 success: function(res){
-                    $(".modal-body").html('')
-                    let img = document.createElement('img');
-                    img.src = res.data
-                    img.classList.add("img-thumbnail")
-                    $("#linkDonwload").attr("href", res.data)
-                    $(".modal-body").append(img)
-                    $("#imageModal").modal('show')
+                    if (res.status == 200){
+                        $(".modal-body").html('')
+                        let img = document.createElement('img');
+                        img.src = res.data
+                        img.classList.add("img-thumbnail")
+                        $("#linkDonwload").attr("href", res.data)
+                        $('#linkDonwload').show()
+                        $(".modal-body").append(img)
+                        $("#imageModal").modal('show')
+                    }else{
+                        console.log(res.data)
+                    }
                 }
             })
         })
         $("#form-read").submit(function(e){
             e.preventDefault()
-            let tekss = `<h2 class="text-center">Digunakan untuk registrasi di A</h2>`
-            $(".modal-body").append(tekss)
-            $("#imageModal").modal('show')
+            let data = new FormData(this)
+            data.append("name", "OK")
+            data.append("visible", 1)
+            $.ajax({
+                url: $(this).attr('action'),
+                method: $(this).attr('method'),
+                data: data, 
+                processData: false,
+                contentType: false,
+                success: function(res){
+                    $(".modal-body").html('')
+                    let tekss = `<h2 class="text-center">${res.data}</h2>`
+                    $(".modal-body").append(tekss)
+                    $('#linkDonwload').hide()
+                    $("#imageModal").modal('show')
+                }
+            })
         })
+
+
     </script>
 </body>
 </html>
