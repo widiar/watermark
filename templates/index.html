@@ -177,7 +177,7 @@
                         toastr.error("File KTP tidak valid")
                     }else{
                         console.log(res.data.name)
-                        if(res.data.file[0]) toastr.error(res.data.file[0], "File KTP")
+                        if(res.data.file) if(res.data.file[0]) toastr.error(res.data.file[0], "File KTP")
                         if(res.data.name) toastr.error(res.data.name, "Teks Watermark")
                     }
                 }
