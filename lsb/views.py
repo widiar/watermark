@@ -40,7 +40,7 @@ class HalamanDepanView(View):
             th, threshed = cv2.threshold(gray, 127, 255, cv2.THRESH_TRUNC)
             # pytesseract.pytesseract.tesseract_cmd = 'C:\Program Files\Tesseract-OCR\\tesseract.exe'
             result = pytesseract.image_to_string((threshed), lang="ind")
-            if "NIK" in result and "Nama" in result:
+            if "NIK" in result:
                 print("Valid")
             else:
                 os.remove(file.file.path)
